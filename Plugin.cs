@@ -16,7 +16,7 @@ namespace HotbarScroll
     public class HotbarScrollPlugin : BaseUnityPlugin
     {
         internal const string ModName = "HotbarScroll";
-        internal const string ModVersion = "1.0.0";
+        internal const string ModVersion = "1.0.1";
         internal const string Author = "Azumatt";
         private const string ModGUID = $"{Author}.{ModName}";
         private static string ConfigFileName = $"{ModGUID}.cfg";
@@ -24,9 +24,16 @@ namespace HotbarScroll
         private readonly Harmony _harmony = new(ModGUID);
         public static readonly ManualLogSource HotbarScrollLogger = BepInEx.Logging.Logger.CreateLogSource(ModName);
 
+        public enum Toggle
+        {
+            On = 1,
+            Off = 0
+        }
+
         public void Awake()
         {
             ModifierKey = config("1 - General", "Modifier Key", new KeyboardShortcut(KeyCode.LeftAlt), new ConfigDescription("The key that must be held to scroll the hotbar.", new AcceptableShortcuts()));
+            InvertedScroll = config("1 - General", "Inverted Scroll", Toggle.Off, "Invert the scroll direction of the hotbar.");
             Assembly assembly = Assembly.GetExecutingAssembly();
             _harmony.PatchAll(assembly);
             SetupWatcher();
@@ -67,6 +74,7 @@ namespace HotbarScroll
         #region ConfigOptions
 
         internal static ConfigEntry<KeyboardShortcut> ModifierKey = null!;
+        internal static ConfigEntry<Toggle> InvertedScroll = null!;
 
         private ConfigEntry<T> config<T>(string group, string name, T value, ConfigDescription description)
         {
@@ -158,6 +166,11 @@ namespace HotbarScroll
             if (HotbarScrollPlugin.ModifierKey.Value.IsKeyHeld())
             {
                 float scrollDelta = ZInput.GetMouseScrollWheel();
+                if (HotbarScrollPlugin.InvertedScroll.Value == HotbarScrollPlugin.Toggle.On)
+                {
+                    scrollDelta *= -1;
+                }
+
                 if (scrollDelta == 0) return;
                 ScrollHotbar(__instance, scrollDelta);
                 Input.ResetInputAxes();
@@ -208,7 +221,7 @@ namespace HotbarScroll
             {
                 CreateSelectionObjects(hotkeyBar);
             }
-            
+
             for (int i = 0; i < hotkeyBar.m_elements.Count; ++i)
             {
                 HotkeyBar.ElementData? element = hotkeyBar.m_elements[i];
