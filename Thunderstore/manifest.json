@@ -1,6 +1,6 @@
 {
   "name": "HotbarScroll",
-  "version_number": "1.0.1",
+  "version_number": "1.0.2",
   "website_url": "https://discord.gg/pdHgy6Bsng",
   "description": "Pretty simple, client side mod that allows you to hold a modifier key (or keys) to scroll through your hotbar.",
   "dependencies": [
